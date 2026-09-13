@@ -1,40 +1,117 @@
 (() => {
+
+    /*
+     * ========================================================
+     * ELEMENT
+     * ========================================================
+     */
+
     const canvas = document.getElementById("twibbonCanvas");
-    const ctx = canvas.getContext("2d", { alpha: false });
+    const ctx = canvas.getContext("2d", {
+        alpha: false
+    });
+
     const stage = document.getElementById("canvasStage");
-    const photoInput = document.getElementById("photoInput");
-    const zoomRange = document.getElementById("zoomRange");
-    const captionInput = document.getElementById("captionInput");
-    const captionPosition = document.getElementById("captionPosition");
-    const captionSize = document.getElementById("captionSize");
-    const templateLabel = document.getElementById("templateLabel");
-    const emptyState = document.getElementById("emptyState");
-    const statusMessage = document.getElementById("statusMessage");
-    const shareDialog = document.getElementById("shareDialog");
+
+    const photoInput =
+        document.getElementById("photoInput");
+
+    const zoomRange =
+        document.getElementById("zoomRange");
+
+    const captionInput =
+        document.getElementById("captionInput");
+
+    const captionPosition =
+        document.getElementById("captionPosition");
+
+    const captionSize =
+        document.getElementById("captionSize");
+
+    const templateLabel =
+        document.getElementById("templateLabel");
+
+    const emptyState =
+        document.getElementById("emptyState");
+
+    const statusMessage =
+        document.getElementById("statusMessage");
+
+    const shareDialog =
+        document.getElementById("shareDialog");
+
+
+    /*
+     * ========================================================
+     * CACHE IMAGE
+     * ========================================================
+     */
 
     const imageCache = new Map();
 
-    let activeTemplate = TEMPLATE_DEFINITIONS[
-        Math.floor(Math.random() * TEMPLATE_DEFINITIONS.length)
-    ];
+
+    /*
+     * ========================================================
+     * TEMPLATE AKTIF
+     * ========================================================
+     */
+
+    let activeTemplate =
+        FINAL_TEMPLATE_DEFINITIONS[
+        Math.floor(
+            Math.random() *
+            FINAL_TEMPLATE_DEFINITIONS.length
+        )
+        ];
+
+    // Sementara lagi desain
+    // let activeTemplate = FINAL_TEMPLATE_DEFINITIONS[1];
+
+    /*
+     * ========================================================
+     * PHOTO STATE
+     * ========================================================
+     */
 
     let photoImage = null;
+
     let drag = null;
+
     let photoState = {
         x: canvas.width / 2,
         y: canvas.height / 2,
         scale: 1
     };
 
+
+    /*
+     * ========================================================
+     * STATUS
+     * ========================================================
+     */
+
     function status(message) {
+
         statusMessage.textContent = message;
+
         window.clearTimeout(status.timer);
+
         status.timer = window.setTimeout(() => {
+
             statusMessage.textContent = "";
+
         }, 4200);
     }
 
+
+    /*
+     * ========================================================
+     * LOAD IMAGE
+     * ========================================================
+     */
+
     function imageFrom(src) {
+
         if (!src) {
             return Promise.resolve(null);
         }
@@ -44,508 +121,1689 @@
         }
 
         const request = new Promise((resolve) => {
+
             const image = new Image();
+
             image.onload = () => resolve(image);
+
             image.onerror = () => resolve(null);
+
             image.src = src;
         });
 
         imageCache.set(src, request);
+
         return request;
     }
 
+
+    /*
+     * ========================================================
+     * RESET PHOTO
+     * ========================================================
+     */
+
     function resetPhoto() {
+
         photoState = {
+
             x: canvas.width / 2,
+
             y: canvas.height / 2,
-            scale: activeTemplate.initialPhotoScale || 1
+
+            scale:
+                activeTemplate.initialPhotoScale || 1
         };
 
-        zoomRange.value = photoState.scale;
+        zoomRange.value =
+            photoState.scale;
     }
 
-    function photoCoverDimensions(image) {
+
+    /*
+     * ========================================================
+     * HITUNG UKURAN FOTO
+     * ========================================================
+     */
+
+    function photoCoverDimensions(
+        image,
+        scaleOverride = null
+    ) {
+
         const coverScale = Math.max(
+
             canvas.width / image.width,
+
             canvas.height / image.height
         );
 
-        const finalScale = coverScale * photoState.scale;
+        const userScale =
+            scaleOverride !== null
+                ? scaleOverride
+                : photoState.scale;
+
+        const finalScale =
+            coverScale * userScale;
 
         return {
-            width: image.width * finalScale,
-            height: image.height * finalScale
+
+            width:
+                image.width * finalScale,
+
+            height:
+                image.height * finalScale
         };
     }
 
+
     /*
-     * FOTO PENGGUNA: layer paling belakang, selalu menutup seluruh kanvas.
-     * Tidak ada clipping circle/rounded rectangle. Area transparan dari frame
-     * PNG dapat berada di mana saja dan semuanya akan memperlihatkan foto ini.
+     * ========================================================
+     * BACKGROUND AWAL
+     *
+     * Saat belum ada foto:
+     * putih.
+     * ========================================================
      */
-    function drawPhotoBackground() {
+
+    function drawInitialBackground() {
+
+        ctx.save();
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.restore();
+    }
+
+
+    /*
+     * ========================================================
+     * FOTO BACKGROUND
+     *
+     * Foto user diperbesar untuk memenuhi seluruh canvas.
+     *
+     * Ini menjadi "ambient background".
+     *
+     * Jadi apabila foto utama kecil:
+     *
+     *       [ foto utama ]
+     *
+     * area di luarnya tetap merupakan foto yang sama.
+     *
+     * ========================================================
+     */
+
+    function drawPhotoAmbientBackground() {
+
+        if (!photoImage) {
+            drawInitialBackground();
+            return;
+        }
+
+        const background =
+            activeTemplate.layout.background;
+
+        const dimensions =
+            photoCoverDimensions(
+                photoImage,
+                background.scale || 1.15
+            );
+
+        ctx.save();
+
+        /*
+         * Blur background
+         */
+
+        if (background.blur > 0) {
+
+            ctx.filter =
+                `blur(${background.blur}px)`;
+        }
+
+        ctx.globalAlpha =
+            background.opacity ?? 1;
+
+        ctx.drawImage(
+
+            photoImage,
+
+            canvas.width / 2 -
+            dimensions.width / 2,
+
+            canvas.height / 2 -
+            dimensions.height / 2,
+
+            dimensions.width,
+
+            dimensions.height
+        );
+
+        ctx.restore();
+
+
+        /*
+         * Darken / overlay
+         */
+
+        const darken =
+            background.darken || 0;
+
+        if (darken > 0) {
+
+            ctx.save();
+
+            ctx.fillStyle =
+                `rgba(0,0,0,${darken})`;
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            ctx.restore();
+        }
+    }
+
+
+    /*
+     * ========================================================
+     * FOTO UTAMA
+     * ========================================================
+     */
+
+    function drawPhotoMain() {
+
         if (!photoImage) {
             return;
         }
 
-        const dimensions = photoCoverDimensions(photoImage);
+        const dimensions =
+            photoCoverDimensions(
+                photoImage
+            );
+
+        ctx.save();
 
         ctx.drawImage(
+
             photoImage,
-            photoState.x - dimensions.width / 2,
-            photoState.y - dimensions.height / 2,
+
+            photoState.x -
+            dimensions.width / 2,
+
+            photoState.y -
+            dimensions.height / 2,
+
             dimensions.width,
+
             dimensions.height
         );
+
+        ctx.restore();
     }
 
+
+    /*
+     * ========================================================
+     * FALLBACK TEMPLATE
+     * ========================================================
+     */
+
     function drawFallbackTemplate() {
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
 
-        gradient.addColorStop(0, activeTemplate.theme);
-        gradient.addColorStop(0.48, "#082b56");
-        gradient.addColorStop(1, "#051930");
+        const gradient =
+            ctx.createLinearGradient(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
 
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(
+            0,
+            activeTemplate.theme
+        );
+
+        gradient.addColorStop(
+            0.48,
+            "#082b56"
+        );
+
+        gradient.addColorStop(
+            1,
+            "#051930"
+        );
+
+        ctx.fillStyle =
+            gradient;
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
         ctx.globalAlpha = 0.22;
 
-        for (let x = -400; x < 1600; x += 155) {
+        for (
+            let x = -400;
+            x < 1600;
+            x += 155
+        ) {
+
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(x, 0, 52, canvas.height);
+
+            ctx.fillRect(
+                x,
+                0,
+                52,
+                canvas.height
+            );
         }
 
         ctx.globalAlpha = 1;
     }
 
-    function drawText(text, x, y, options = {}) {
+
+    /*
+     * ========================================================
+     * DRAW TEXT
+     * ========================================================
+     */
+
+    function drawText(
+        text,
+        x,
+        y,
+        options = {}
+    ) {
+
         const {
+
             size = 38,
+
             maxWidth = 820,
+
             color = "#ffffff",
+
             weight = 700,
+
             align = "center",
+
             shadow = true,
+
             lineHeight = 1.22
+
         } = options;
 
-        const words = String(text || "")
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
+
+        const words =
+            String(text || "")
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+
 
         if (!words.length) {
             return;
         }
 
+
         ctx.save();
-        ctx.font = `${weight} ${size}px Montserrat, Arial, sans-serif`;
-        ctx.fillStyle = color;
-        ctx.textAlign = align;
-        ctx.textBaseline = "middle";
+
+
+        ctx.font =
+            `${weight} ${size}px Montserrat, Arial, sans-serif`;
+
+
+        ctx.fillStyle =
+            color;
+
+
+        ctx.textAlign =
+            align;
+
+
+        ctx.textBaseline =
+            "middle";
+
 
         if (shadow) {
-            ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetY = 3;
+
+            ctx.shadowColor =
+                "rgba(0, 0, 0, 0.6)";
+
+            ctx.shadowBlur =
+                12;
+
+            ctx.shadowOffsetY =
+                3;
         }
 
+
+        /*
+         * Word wrapping
+         */
+
         const lines = [];
+
         let line = "";
 
-        words.forEach((word) => {
-            const candidate = line ? `${line} ${word}` : word;
 
-            if (ctx.measureText(candidate).width > maxWidth && line) {
+        words.forEach((word) => {
+
+            const candidate =
+                line
+                    ? `${line} ${word}`
+                    : word;
+
+
+            if (
+                ctx.measureText(candidate).width >
+                maxWidth &&
+                line
+            ) {
+
                 lines.push(line);
+
                 line = word;
+
             } else {
+
                 line = candidate;
             }
         });
+
 
         if (line) {
             lines.push(line);
         }
 
-        const blockHeight = (lines.length - 1) * size * lineHeight;
 
-        lines.forEach((item, index) => {
-            ctx.fillText(
-                item,
-                x,
-                y - blockHeight / 2 + index * size * lineHeight
-            );
-        });
+        const blockHeight =
+            (lines.length - 1) *
+            size *
+            lineHeight;
+
+
+        lines.forEach(
+            (item, index) => {
+
+                ctx.fillText(
+
+                    item,
+
+                    x,
+
+                    y -
+                    blockHeight / 2 +
+                    index *
+                    size *
+                    lineHeight
+                );
+            }
+        );
+
 
         ctx.restore();
     }
 
-    async function drawLogos() {
-        const { wordmark, emblem } = activeTemplate.layout;
 
-        const [wordmarkImage, emblemImage] = await Promise.all([
-            imageFrom(ASSET_PATHS.wordmark),
-            imageFrom(ASSET_PATHS.emblem)
+    /*
+     * ========================================================
+     * DRAW LOGOS
+     * ========================================================
+     */
+
+    async function drawLogos() {
+
+        const {
+            wordmark,
+            emblem
+        } = activeTemplate.layout;
+
+
+        const [
+            wordmarkImage,
+            emblemImage
+        ] = await Promise.all([
+
+            imageFrom(
+                ASSET_PATHS.wordmark
+            ),
+
+            imageFrom(
+                ASSET_PATHS.emblem
+            )
         ]);
 
+
+        /*
+         * WORDMARK
+         */
+
         if (wordmarkImage) {
+
+            ctx.save();
+
+            ctx.globalAlpha =
+                wordmark.opacity ?? 1;
+
             ctx.drawImage(
+
                 wordmarkImage,
-                wordmark.x - wordmark.width / 2,
-                wordmark.y - wordmark.height / 2,
+
+                wordmark.x -
+                wordmark.width / 2,
+
+                wordmark.y -
+                wordmark.height / 2,
+
                 wordmark.width,
+
                 wordmark.height
             );
+
+            ctx.restore();
         }
 
+
+        /*
+         * EMBLEM
+         */
+
         if (emblemImage) {
+
+            ctx.save();
+
+            ctx.globalAlpha =
+                emblem.opacity ?? 1;
+
             ctx.drawImage(
+
                 emblemImage,
-                emblem.x - emblem.width / 2,
-                emblem.y - emblem.height / 2,
+
+                emblem.x -
+                emblem.width / 2,
+
+                emblem.y -
+                emblem.height / 2,
+
                 emblem.width,
+
                 emblem.height
             );
+
+            ctx.restore();
         }
     }
 
+
+    /*
+     * ========================================================
+     * CAPTION Y
+     * ========================================================
+     */
+
+    function getCaptionY() {
+
+        const caption =
+            activeTemplate.layout.caption;
+
+
+        switch (
+        captionPosition.value
+        ) {
+
+            case "top":
+                return caption.topY;
+
+            case "bottom":
+                return caption.bottomY;
+
+            case "middle":
+            default:
+                return caption.middleY;
+        }
+    }
+
+
+    /*
+     * ========================================================
+     * RENDER
+     * ========================================================
+     */
+
     async function render() {
-        const templateImage = await imageFrom(activeTemplate.file);
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const templateImage =
+            await imageFrom(
+                activeTemplate.file
+            );
 
-        // Layer dasar bila foto belum dipilih atau bila tepi foto tidak menutup.
-        ctx.fillStyle = "#0b315c";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Layer 1: foto pengguna memenuhi SELURUH area kanvas.
-        drawPhotoBackground();
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
-        // Layer 2: template PNG transparan berada di atas foto.
+
+        /*
+         * ====================================================
+         * LAYER 0
+         *
+         * Putih ketika belum ada foto.
+         *
+         * Ketika ada foto:
+         * foto menjadi ambient background.
+         * ====================================================
+         */
+
+        drawPhotoAmbientBackground();
+
+
+        /*
+         * ====================================================
+         * LAYER 1
+         *
+         * Foto utama user.
+         * ====================================================
+         */
+
+        drawPhotoMain();
+
+
+        /*
+         * ====================================================
+         * LAYER 2
+         *
+         * Template PNG.
+         * ====================================================
+         */
+
         if (templateImage) {
-            ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+
+            ctx.drawImage(
+
+                templateImage,
+
+                0,
+                0,
+
+                canvas.width,
+                canvas.height
+            );
+
         } else {
+
             drawFallbackTemplate();
         }
 
-        // Layer 3: tulisan permanen kampanye dan logo.
-        const layout = activeTemplate.layout;
 
-        drawText(CAMPAIGN.title, 540, layout.campaignY, {
-            size: 41,
-            maxWidth: 690,
-            weight: 800,
-            color: layout.fixedTextColor,
-            shadow: layout.fixedTextShadow
-        });
+        /*
+         * ====================================================
+         * LAYER 3
+         *
+         * TEXT CAMPAIGN
+         * ====================================================
+         */
 
-        drawText(CAMPAIGN.faculty, 540, layout.facultyY, {
-            size: 25,
-            maxWidth: 790,
-            weight: 700,
-            color: layout.fixedTextColor,
-            shadow: layout.fixedTextShadow
-        });
+        const layout =
+            activeTemplate.layout;
 
-        drawText(CAMPAIGN.welcome, 540, layout.welcomeY, {
-            size: 29,
-            maxWidth: 820,
-            weight: 800,
-            color: layout.fixedTextColor,
-            shadow: layout.fixedTextShadow
-        });
 
-        drawText(CAMPAIGN.smart, 540, layout.smartY, {
-            size: 25,
-            maxWidth: 780,
-            weight: 700,
-            color: layout.fixedTextColor,
-            shadow: layout.fixedTextShadow
-        });
+        drawText(
+
+            CAMPAIGN.title,
+
+            layout.campaign.x,
+
+            layout.campaign.y,
+
+            {
+
+                size:
+                    layout.campaign.size,
+
+                maxWidth:
+                    layout.campaign.maxWidth,
+
+                weight:
+                    layout.campaign.weight,
+
+                color:
+                    layout.campaign.color,
+
+                shadow:
+                    layout.campaign.shadow,
+
+                align:
+                    layout.campaign.align
+            }
+        );
+
+
+        /*
+         * FACULTY
+         */
+
+        drawText(
+
+            CAMPAIGN.faculty,
+
+            layout.faculty.x,
+
+            layout.faculty.y,
+
+            {
+
+                size:
+                    layout.faculty.size,
+
+                maxWidth:
+                    layout.faculty.maxWidth,
+
+                weight:
+                    layout.faculty.weight,
+
+                color:
+                    layout.faculty.color,
+
+                shadow:
+                    layout.faculty.shadow,
+
+                align:
+                    layout.faculty.align
+            }
+        );
+
+
+        /*
+         * WELCOME
+         */
+
+        drawText(
+
+            CAMPAIGN.welcome,
+
+            layout.welcome.x,
+
+            layout.welcome.y,
+
+            {
+
+                size:
+                    layout.welcome.size,
+
+                maxWidth:
+                    layout.welcome.maxWidth,
+
+                weight:
+                    layout.welcome.weight,
+
+                color:
+                    layout.welcome.color,
+
+                shadow:
+                    layout.welcome.shadow,
+
+                align:
+                    layout.welcome.align
+            }
+        );
+
+
+        /*
+         * SMART
+         */
+
+        drawText(
+
+            CAMPAIGN.smart,
+
+            layout.smart.x,
+
+            layout.smart.y,
+
+            {
+
+                size:
+                    layout.smart.size,
+
+                maxWidth:
+                    layout.smart.maxWidth,
+
+                weight:
+                    layout.smart.weight,
+
+                color:
+                    layout.smart.color,
+
+                shadow:
+                    layout.smart.shadow,
+
+                align:
+                    layout.smart.align
+            }
+        );
+
+
+        /*
+         * ====================================================
+         * LOGO
+         * ====================================================
+         */
 
         await drawLogos();
 
-        // Layer 4: caption pengguna.
-        const sizeMap = {
-            small: 27,
-            medium: 34,
-            large: 42
+
+        /*
+         * ====================================================
+         * LAYER 4
+         *
+         * USER CAPTION
+         * ====================================================
+         */
+
+        const caption =
+            layout.caption;
+
+
+        /*
+         * Ukuran caption user.
+         *
+         * Template menentukan base size.
+         */
+
+        const sizeMultiplier = {
+
+            small: 0.8,
+
+            medium: 1,
+
+            large: 1.25
         };
 
-        const yMap = {
-            top: layout.caption.topY,
-            middle: layout.caption.middleY,
-            bottom: layout.caption.bottomY
-        };
 
-        drawText(captionInput.value, layout.caption.x, yMap[captionPosition.value], {
-            size: sizeMap[captionSize.value],
-            maxWidth: layout.caption.maxWidth,
-            weight: 700,
-            color: layout.caption.color,
-            shadow: layout.caption.shadow
-        });
+        const finalCaptionSize =
 
-        templateLabel.textContent = `Desain aktif: ${activeTemplate.name}`;
+            caption.size *
+            (
+                sizeMultiplier[
+                captionSize.value
+                ] || 1
+            );
+
+
+        drawText(
+
+            captionInput.value,
+
+            caption.x,
+
+            getCaptionY(),
+
+            {
+
+                size:
+                    finalCaptionSize,
+
+                maxWidth:
+                    caption.maxWidth,
+
+                weight:
+                    caption.weight,
+
+                color:
+                    caption.color,
+
+                shadow:
+                    caption.shadow,
+
+                align:
+                    caption.align
+            }
+        );
+
+
+        /*
+         * Label template
+         */
+
+        templateLabel.textContent =
+            `Desain aktif: ${activeTemplate.name}`;
     }
 
-    function pointerPosition(event) {
-        const rect = canvas.getBoundingClientRect();
-        const point = event.touches ? event.touches[0] : event;
-
-        return {
-            x: ((point.clientX - rect.left) * canvas.width) / rect.width,
-            y: ((point.clientY - rect.top) * canvas.height) / rect.height
-        };
-    }
 
     /*
-     * Drag berlaku pada seluruh canvas, bukan hanya pada satu slot foto.
-     * Ini selaras dengan foto yang menjadi background penuh.
+     * ========================================================
+     * POINTER POSITION
+     * ========================================================
      */
+
+    function pointerPosition(event) {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const point =
+            event.touches
+                ? event.touches[0]
+                : event;
+
+
+        return {
+
+            x:
+                (
+                    point.clientX -
+                    rect.left
+                ) *
+                canvas.width /
+                rect.width,
+
+            y:
+                (
+                    point.clientY -
+                    rect.top
+                ) *
+                canvas.height /
+                rect.height
+        };
+    }
+
+
+    /*
+     * ========================================================
+     * DRAG START
+     * ========================================================
+     */
+
     function startDrag(event) {
+
         if (!photoImage) {
             return;
         }
 
-        const point = pointerPosition(event);
+
+        const point =
+            pointerPosition(event);
+
 
         drag = {
-            x: point.x,
-            y: point.y,
-            photoX: photoState.x,
-            photoY: photoState.y
+
+            x:
+                point.x,
+
+            y:
+                point.y,
+
+            photoX:
+                photoState.x,
+
+            photoY:
+                photoState.y
         };
 
-        canvas.setPointerCapture?.(event.pointerId);
+
+        canvas.setPointerCapture?.(
+            event.pointerId
+        );
     }
 
+
+    /*
+     * ========================================================
+     * DRAG MOVE
+     * ========================================================
+     */
+
     function moveDrag(event) {
+
         if (!drag) {
             return;
         }
 
-        const point = pointerPosition(event);
-        photoState.x = drag.photoX + point.x - drag.x;
-        photoState.y = drag.photoY + point.y - drag.y;
+
+        const point =
+            pointerPosition(event);
+
+
+        photoState.x =
+
+            drag.photoX +
+            point.x -
+            drag.x;
+
+
+        photoState.y =
+
+            drag.photoY +
+            point.y -
+            drag.y;
+
+
         render();
     }
 
+
+    /*
+     * ========================================================
+     * DRAG END
+     * ========================================================
+     */
+
     function endDrag() {
+
         drag = null;
     }
 
+
+    /*
+     * ========================================================
+     * SHARE TEXT
+     * ========================================================
+     */
+
     function getShareText() {
-        const caption = captionInput.value.trim();
-        return `${caption ? `${caption}\n\n` : ""}${CAMPAIGN.hashtags}`;
+
+        const caption =
+            captionInput.value.trim();
+
+
+        return (
+
+            caption
+                ? `${caption}\n\n`
+                : ""
+        ) +
+            CAMPAIGN.hashtags;
     }
+
+
+    /*
+     * ========================================================
+     * CANVAS -> BLOB
+     * ========================================================
+     */
 
     function blobFromCanvas() {
-        return new Promise((resolve) => {
-            canvas.toBlob(resolve, "image/png", 1);
-        });
+
+        return new Promise(
+            (resolve) => {
+
+                canvas.toBlob(
+
+                    resolve,
+
+                    "image/png",
+
+                    1
+                );
+            }
+        );
     }
 
+
+    /*
+     * ========================================================
+     * DOWNLOAD
+     * ========================================================
+     */
+
     async function downloadPng() {
+
         await render();
-        const blob = await blobFromCanvas();
+
+
+        const blob =
+            await blobFromCanvas();
+
 
         if (!blob) {
-            status("Gagal menyiapkan gambar. Coba lagi.");
+
+            status(
+                "Gagal menyiapkan gambar. Coba lagi."
+            );
+
             return;
         }
 
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
+
+        const url =
+            URL.createObjectURL(blob);
+
+
+        const link =
+            document.createElement("a");
+
 
         link.href = url;
-        link.download = "twibbon-maba-fti-uniska-mab-2026-2027.png";
+
+
+        link.download =
+            "twibbon-maba-fti-uniska-mab-2026-2027.png";
+
 
         document.body.appendChild(link);
+
+
         link.click();
+
+
         link.remove();
+
+
         URL.revokeObjectURL(url);
 
-        status("PNG berhasil dibuat.");
+
+        status(
+            "PNG berhasil dibuat."
+        );
     }
+
+
+    /*
+     * ========================================================
+     * COPY CAPTION
+     * ========================================================
+     */
 
     async function copyCaption() {
+
         try {
-            await navigator.clipboard.writeText(getShareText());
-            status("Caption dan hashtag telah disalin.");
+
+            await navigator.clipboard.writeText(
+                getShareText()
+            );
+
+
+            status(
+                "Caption dan hashtag telah disalin."
+            );
+
         } catch {
-            status("Tidak dapat menyalin otomatis. Silakan salin caption secara manual.");
+
+            status(
+                "Tidak dapat menyalin otomatis. Silakan salin caption secara manual."
+            );
         }
     }
+
+
+    /*
+     * ========================================================
+     * NATIVE SHARE
+     * ========================================================
+     */
 
     async function nativeShare() {
-        if (!navigator.share || !navigator.canShare) {
+
+        if (
+            !navigator.share ||
+            !navigator.canShare
+        ) {
+
             return false;
         }
+
 
         await render();
-        const blob = await blobFromCanvas();
+
+
+        const blob =
+            await blobFromCanvas();
+
 
         if (!blob) {
+
             return false;
         }
 
-        const file = new File(
-            [blob],
-            "twibbon-maba-fti-uniska-mab-2026-2027.png",
-            { type: "image/png" }
-        );
+
+        const file =
+
+            new File(
+
+                [blob],
+
+                "twibbon-maba-fti-uniska-mab-2026-2027.png",
+
+                {
+                    type: "image/png"
+                }
+            );
+
 
         const payload = {
-            title: "Twibbon Maba FTI UNISKA MAB",
-            text: getShareText(),
-            files: [file]
+
+            title:
+                "Twibbon Maba FTI UNISKA MAB",
+
+            text:
+                getShareText(),
+
+            files:
+                [file]
         };
 
-        if (!navigator.canShare(payload)) {
+
+        if (
+            !navigator.canShare(payload)
+        ) {
+
             return false;
         }
 
+
         try {
-            await navigator.share(payload);
+
+            await navigator.share(
+                payload
+            );
+
             return true;
+
         } catch (error) {
-            return error.name === "AbortError";
+
+            return (
+                error.name ===
+                "AbortError"
+            );
         }
     }
 
+
+    /*
+     * ========================================================
+     * SOCIAL SHARE
+     * ========================================================
+     */
+
     function openShare(platform) {
-        const shareText = encodeURIComponent(getShareText());
-        const pageUrl = encodeURIComponent(location.href);
 
-        if (platform === "whatsapp") {
-            window.open(`https://wa.me/?text=${shareText}`, "_blank", "noopener");
-        }
+        const shareText =
+            encodeURIComponent(
+                getShareText()
+            );
 
-        if (platform === "x") {
-            window.open(`https://twitter.com/intent/tweet?text=${shareText}`, "_blank", "noopener");
-        }
 
-        if (platform === "facebook") {
+        const pageUrl =
+            encodeURIComponent(
+                location.href
+            );
+
+
+        if (
+            platform === "whatsapp"
+        ) {
+
             window.open(
-                `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}&quote=${shareText}`,
+
+                `https://wa.me/?text=${shareText}`,
+
                 "_blank",
+
                 "noopener"
             );
         }
 
-        if (platform === "instagram" || platform === "tiktok") {
+
+        if (
+            platform === "x"
+        ) {
+
+            window.open(
+
+                `https://twitter.com/intent/tweet?text=${shareText}`,
+
+                "_blank",
+
+                "noopener"
+            );
+        }
+
+
+        if (
+            platform === "facebook"
+        ) {
+
+            window.open(
+
+                `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}&quote=${shareText}`,
+
+                "_blank",
+
+                "noopener"
+            );
+        }
+
+
+        if (
+            platform === "instagram" ||
+            platform === "tiktok"
+        ) {
+
             downloadPng();
+
             copyCaption();
-            const appName = platform === "instagram" ? "Instagram" : "TikTok";
-            status(`Gambar diunduh dan caption disalin. Unggah ke ${appName} dari aplikasi Anda.`);
+
+
+            const appName =
+                platform === "instagram"
+                    ? "Instagram"
+                    : "TikTok";
+
+
+            status(
+
+                `Gambar diunduh dan caption disalin. Unggah ke ${appName} dari aplikasi Anda.`
+            );
         }
     }
 
-    photoInput.addEventListener("change", (event) => {
-        const [file] = event.target.files;
 
-        if (!file) {
-            return;
-        }
+    /*
+     * ========================================================
+     * PHOTO UPLOAD
+     * ========================================================
+     */
 
-        if (!file.type.startsWith("image/")) {
-            status("Pilih file gambar yang valid.");
-            return;
-        }
+    photoInput.addEventListener(
+        "change",
+        (event) => {
 
-        const reader = new FileReader();
+            const [file] =
+                event.target.files;
 
-        reader.onload = () => {
-            const image = new Image();
 
-            image.onload = () => {
-                photoImage = image;
-                resetPhoto();
-                emptyState.classList.add("is-hidden");
-                render();
+            if (!file) {
+                return;
+            }
+
+
+            if (
+                !file.type.startsWith(
+                    "image/"
+                )
+            ) {
+
+                status(
+                    "Pilih file gambar yang valid."
+                );
+
+                return;
+            }
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload = () => {
+
+                const image =
+                    new Image();
+
+
+                image.onload = () => {
+
+                    photoImage =
+                        image;
+
+
+                    resetPhoto();
+
+
+                    emptyState.classList.add(
+                        "is-hidden"
+                    );
+
+
+                    render();
+                };
+
+
+                image.src =
+                    reader.result;
             };
 
-            image.src = reader.result;
-        };
 
-        reader.readAsDataURL(file);
-    });
+            reader.readAsDataURL(file);
+        }
+    );
 
-    zoomRange.addEventListener("input", () => {
-        photoState.scale = Number(zoomRange.value);
-        render();
-    });
 
-    captionInput.addEventListener("input", render);
-    captionPosition.addEventListener("change", render);
-    captionSize.addEventListener("change", render);
+    /*
+     * ========================================================
+     * ZOOM
+     * ========================================================
+     */
 
-    document.getElementById("resetPhoto").addEventListener("click", () => {
-        resetPhoto();
-        render();
-    });
+    zoomRange.addEventListener(
+        "input",
+        () => {
 
-    document.getElementById("randomTemplate").addEventListener("click", () => {
-        const alternatives = TEMPLATE_DEFINITIONS.filter(
-            (item) => item.id !== activeTemplate.id
+            photoState.scale =
+                Number(
+                    zoomRange.value
+                );
+
+
+            render();
+        }
+    );
+
+
+    /*
+     * ========================================================
+     * CAPTION
+     * ========================================================
+     */
+
+    captionInput.addEventListener(
+        "input",
+        render
+    );
+
+
+    captionPosition.addEventListener(
+        "change",
+        render
+    );
+
+
+    captionSize.addEventListener(
+        "change",
+        render
+    );
+
+
+    /*
+     * ========================================================
+     * RESET PHOTO
+     * ========================================================
+     */
+
+    document
+        .getElementById("resetPhoto")
+        .addEventListener(
+            "click",
+            () => {
+
+                resetPhoto();
+
+                render();
+            }
         );
 
-        activeTemplate = alternatives[
-            Math.floor(Math.random() * alternatives.length)
-        ];
 
-        resetPhoto();
-        render();
-    });
+    /*
+     * ========================================================
+     * RANDOM TEMPLATE
+     * ========================================================
+     */
 
-    document.getElementById("downloadButton").addEventListener("click", downloadPng);
-    document.getElementById("copyButton").addEventListener("click", copyCaption);
+    document
+        .getElementById("randomTemplate")
+        .addEventListener(
+            "click",
+            () => {
 
-    document.getElementById("shareButton").addEventListener("click", async () => {
-        if (await nativeShare()) {
-            return;
+                const alternatives =
+                    FINAL_TEMPLATE_DEFINITIONS.filter(
+
+                        (item) =>
+                            item.id !==
+                            activeTemplate.id
+                    );
+
+
+                activeTemplate =
+
+                    alternatives[
+                    Math.floor(
+                        Math.random() *
+                        alternatives.length
+                    )
+                    ];
+
+
+                resetPhoto();
+
+                render();
+            }
+        );
+
+
+    /*
+     * ========================================================
+     * DOWNLOAD
+     * ========================================================
+     */
+
+    document
+        .getElementById("downloadButton")
+        .addEventListener(
+            "click",
+            downloadPng
+        );
+
+
+    /*
+     * ========================================================
+     * COPY
+     * ========================================================
+     */
+
+    document
+        .getElementById("copyButton")
+        .addEventListener(
+            "click",
+            copyCaption
+        );
+
+
+    /*
+     * ========================================================
+     * SHARE
+     * ========================================================
+     */
+
+    document
+        .getElementById("shareButton")
+        .addEventListener(
+            "click",
+            async () => {
+
+                if (
+                    await nativeShare()
+                ) {
+
+                    return;
+                }
+
+
+                shareDialog.showModal();
+            }
+        );
+
+
+    /*
+     * ========================================================
+     * DIALOG DOWNLOAD
+     * ========================================================
+     */
+
+    document
+        .getElementById("dialogDownload")
+        .addEventListener(
+            "click",
+            downloadPng
+        );
+
+
+    /*
+     * ========================================================
+     * DIALOG COPY
+     * ========================================================
+     */
+
+    document
+        .getElementById("dialogCopy")
+        .addEventListener(
+            "click",
+            copyCaption
+        );
+
+
+    /*
+     * ========================================================
+     * SOCIAL BUTTON
+     * ========================================================
+     */
+
+    document
+        .querySelectorAll(
+            "[data-share]"
+        )
+        .forEach(
+            (button) => {
+
+                button.addEventListener(
+                    "click",
+                    () =>
+                        openShare(
+                            button.dataset.share
+                        )
+                );
+            }
+        );
+
+
+    /*
+     * ========================================================
+     * POINTER EVENTS
+     * ========================================================
+     */
+
+    canvas.addEventListener(
+        "pointerdown",
+        startDrag
+    );
+
+
+    canvas.addEventListener(
+        "pointermove",
+        moveDrag
+    );
+
+
+    canvas.addEventListener(
+        "pointerup",
+        endDrag
+    );
+
+
+    canvas.addEventListener(
+        "pointercancel",
+        endDrag
+    );
+
+
+    canvas.addEventListener(
+        "pointerleave",
+        (event) => {
+
+            if (
+                event.buttons === 0
+            ) {
+
+                endDrag();
+            }
         }
+    );
 
-        shareDialog.showModal();
-    });
 
-    document.getElementById("dialogDownload").addEventListener("click", downloadPng);
-    document.getElementById("dialogCopy").addEventListener("click", copyCaption);
-
-    document.querySelectorAll("[data-share]").forEach((button) => {
-        button.addEventListener("click", () => openShare(button.dataset.share));
-    });
-
-    canvas.addEventListener("pointerdown", startDrag);
-    canvas.addEventListener("pointermove", moveDrag);
-    canvas.addEventListener("pointerup", endDrag);
-    canvas.addEventListener("pointercancel", endDrag);
-
-    canvas.addEventListener("pointerleave", (event) => {
-        if (event.buttons === 0) {
-            endDrag();
-        }
-    });
+    /*
+     * ========================================================
+     * MOUSE WHEEL ZOOM
+     * ========================================================
+     */
 
     stage.addEventListener(
+
         "wheel",
+
         (event) => {
+
             if (!photoImage) {
                 return;
             }
 
+
             event.preventDefault();
-            const delta = event.deltaY > 0 ? -0.06 : 0.06;
-            photoState.scale = Math.max(0.25, Math.min(3, photoState.scale + delta));
-            zoomRange.value = photoState.scale;
+
+
+            const delta =
+                event.deltaY > 0
+                    ? -0.06
+                    : 0.06;
+
+
+            photoState.scale =
+
+                Math.max(
+
+                    0.25,
+
+                    Math.min(
+
+                        3,
+
+                        photoState.scale +
+                        delta
+                    )
+                );
+
+
+            zoomRange.value =
+                photoState.scale;
+
+
             render();
         },
-        { passive: false }
+
+        {
+            passive: false
+        }
     );
 
+
+    /*
+     * ========================================================
+     * INITIAL RENDER
+     *
+     * Pada kondisi awal canvas putih.
+     * ========================================================
+     */
+
     resetPhoto();
+
     render();
+
 })();
