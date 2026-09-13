@@ -18,15 +18,15 @@ const baseLayout = {
     smartY: 1600,
     wordmark: {
         x: 102,
-        y: 150,
+        y: 160,
         width: 142,
-        height: 142
+        height: 102
     },
     emblem: {
         x: 978,
         y: 150,
-        width: 142,
-        height: 142
+        width: 184,
+        height: 184
     },
     fixedTextColor: "#ffffff",
     fixedTextShadow: true,
@@ -64,28 +64,28 @@ const TEMPLATE_DEFINITIONS = [
         id: "template-02",
         name: "Heritage Maroon",
         file: "assets/templates/template-02.png",
-        theme: "#6e1729",
+        theme: "#1475dd",
         initialPhotoScale: 1
     },
     {
         id: "template-03",
         name: "Green Tech Campus",
         file: "assets/templates/template-03.png",
-        theme: "#12683f",
+        theme: "#1475dd",
         initialPhotoScale: 1
     },
     {
         id: "template-04",
         name: "Digital Blue Grid",
         file: "assets/templates/template-04.png",
-        theme: "#083b72",
+        theme: "#6e1729",
         initialPhotoScale: 1
     },
     {
         id: "template-05",
         name: "Smart IT Cyan",
         file: "assets/templates/template-05.png",
-        theme: "#0e9fb7",
+        theme: "#6e1729",
         initialPhotoScale: 1
     },
     {
@@ -106,14 +106,14 @@ const TEMPLATE_DEFINITIONS = [
         id: "template-08",
         name: "Academic Navy",
         file: "assets/templates/template-08.png",
-        theme: "#102c55",
+        theme: "#12683f",
         initialPhotoScale: 1
     },
     {
         id: "template-09",
         name: "FTI Digital Spectrum",
         file: "assets/templates/template-09.png",
-        theme: "#4a4ecf",
+        theme: "#12683f",
         initialPhotoScale: 1
     }
 ].map((template) => ({
