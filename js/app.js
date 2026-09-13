@@ -56,16 +56,16 @@
      * ========================================================
      */
 
-    // let activeTemplate =
-    //     FINAL_TEMPLATE_DEFINITIONS[
-    //     Math.floor(
-    //         Math.random() *
-    //         FINAL_TEMPLATE_DEFINITIONS.length
-    //     )
-    //     ];
+    let activeTemplate =
+        FINAL_TEMPLATE_DEFINITIONS[
+        Math.floor(
+            Math.random() *
+            FINAL_TEMPLATE_DEFINITIONS.length
+        )
+        ];
 
     // Sementara lagi desain
-    let activeTemplate = FINAL_TEMPLATE_DEFINITIONS[6];
+    // let activeTemplate = FINAL_TEMPLATE_DEFINITIONS[6];
 
     /*
      * ========================================================
