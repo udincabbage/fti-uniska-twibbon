@@ -8,7 +8,7 @@ const CAMPAIGN = {
     title: "MAHASISWA BARU 2026/2027",
     faculty: "FAKULTAS TEKNOLOGI INFORMASI UNISKA MAB",
     welcome: "SELAMAT BERGABUNG DI KELUARGA BESAR UNISKA MAB",
-    smart: "SMART IT UNISKA MAB",
+    smart: "FTI UNISKA MAB",
 
     hashtags:
         "#ftiuniskbjm #gabungftiuniskabjm #mabaftiuniskabjm #SmartITUNISKA"
@@ -233,8 +233,8 @@ const TEMPLATE_DEFINITIONS = [
 
             faculty: {
                 x: 540,
-                y: 202,
-                size: 25,
+                y: 212,
+                size: 39,
                 color: "#ffffff",
                 weight: 700,
                 maxWidth: 790,
@@ -266,9 +266,9 @@ const TEMPLATE_DEFINITIONS = [
 
             caption: {
                 x: 1060,
-                topY: 120,
-                middleY: 590,
-                bottomY: 770,
+                topY: 110,
+                middleY: 580,
+                bottomY: 760,
                 maxWidth: 780,
                 size: 45,
                 color: "#fff",
@@ -298,11 +298,11 @@ const TEMPLATE_DEFINITIONS = [
     {
         id: "template-02",
 
-        name: "Heritage Maroon",
+        name: "Blue Circle",
 
         file: "assets/templates/template-02.png",
 
-        theme: "#6e1729",
+        theme: "#1c2cbd",
 
         initialPhotoScale: 1,
 
@@ -321,13 +321,13 @@ const TEMPLATE_DEFINITIONS = [
 
             faculty: {
                 x: 540,
-                y: 180,
-                size: 23,
-                color: "#ffffff",
+                y: 212,
+                size: 39,
+                color: "#160f58",
                 weight: 700,
                 maxWidth: 790,
                 align: "center",
-                shadow: true
+                shadow: false
             },
 
             welcome: {
@@ -363,8 +363,17 @@ const TEMPLATE_DEFINITIONS = [
                 weight: 700,
                 shadow: true,
                 align: "center"
-            }
+            },
+            emblem: {
+                x: 828,
+                y: 1450,
+                width: 350,
+                height: 350,
+                opacity: 1
+            },
         }
+
+
     },
 
 
@@ -398,29 +407,61 @@ const TEMPLATE_DEFINITIONS = [
                 shadow: true
             },
 
+            emblem: {
+                x: 268,
+                y: 1350,
+                width: 400,
+                height: 400,
+                opacity: 1
+            },
+
             faculty: {
                 x: 540,
-                y: 195,
-                size: 24,
-                color: "#ffffff",
+                y: 212,
+                size: 39,
+                color: "#160f58",
                 weight: 700,
-                maxWidth: 780,
+                maxWidth: 790,
                 align: "center",
-                shadow: true
+                shadow: false
             },
 
             caption: {
-                x: 540,
+                x: 70,
                 topY: 360,
-                middleY: 1450,
-                bottomY: 1730,
+                middleY: 1650,
+                bottomY: 1930,
                 maxWidth: 800,
                 size: 32,
                 color: "#ffffff",
                 weight: 700,
                 shadow: true,
-                align: "center"
-            }
+                align: "left"
+            },
+
+
+            welcome: {
+                x: 1040,
+                y: 410,
+                size: 48,
+                color: "#ffffff",
+                weight: 800,
+                maxWidth: 820,
+                align: "right",
+                shadow: true
+            },
+
+            smart: {
+                x: 540,
+                y: 1805,
+                size: 55,
+                color: "#ffd700",
+                weight: 800,
+                maxWidth: 780,
+                align: "center",
+                shadow: true
+            },
+
         }
     },
 
@@ -446,7 +487,7 @@ const TEMPLATE_DEFINITIONS = [
 
             campaign: {
                 x: 540,
-                y: 105,
+                y: 85,
                 size: 45,
                 color: "#fff",
                 weight: 800,
@@ -457,13 +498,13 @@ const TEMPLATE_DEFINITIONS = [
 
             faculty: {
                 x: 540,
-                y: 170,
-                size: 22,
-                color: "#cfcfcf",
+                y: 182,
+                size: 44,
+                color: "#fff",
                 weight: 700,
-                maxWidth: 760,
+                maxWidth: 900,
                 align: "center",
-                shadow: false
+                shadow: true
             },
 
             caption: {
@@ -471,7 +512,7 @@ const TEMPLATE_DEFINITIONS = [
                 topY: 250,
                 middleY: 1350,
                 bottomY: 1600,
-                maxWidth: 550,
+                maxWidth: 700,
                 size: 46,
                 color: "#fff",
                 weight: 700,
@@ -480,18 +521,41 @@ const TEMPLATE_DEFINITIONS = [
             },
 
             wordmark: {
-                x: 140,
-                y: 1700,
-                width: 170,
-                height: 120
+                x: 300,
+                y: 500,
+                width: 250,
+                height: 180
             },
 
             emblem: {
                 x: 930,
-                y: 1700,
-                width: 140,
-                height: 140
-            }
+                y: 1500,
+                width: 275,
+                height: 275
+            },
+
+            welcome: {
+                x: 1040,
+                y: 1710,
+                size: 48,
+                color: "#ffffff",
+                weight: 800,
+                maxWidth: 820,
+                align: "right",
+                shadow: true
+            },
+
+            smart: {
+                x: 540,
+                y: 1805,
+                size: 55,
+                color: "#ffd700",
+                weight: 800,
+                maxWidth: 780,
+                align: "center",
+                shadow: true
+            },
+
         }
     },
 
@@ -505,7 +569,7 @@ const TEMPLATE_DEFINITIONS = [
     {
         id: "template-05",
 
-        name: "Smart IT Cyan",
+        name: "Maroon Intallu",
 
         file: "assets/templates/template-05.png",
 
@@ -528,30 +592,51 @@ const TEMPLATE_DEFINITIONS = [
 
             faculty: {
                 x: 540,
-                y: 190,
-                size: 24,
-                color: "#ffffff",
+                y: 212,
+                size: 39,
+                color: "#160f58",
                 weight: 700,
                 maxWidth: 790,
                 align: "center",
-                shadow: true
+                shadow: false
             },
 
             caption: {
-                x: 540,
+                x: 1040,
                 topY: 400,
-                middleY: 1440,
-                bottomY: 1750,
+                middleY: 1240,
+                bottomY: 1450,
                 maxWidth: 760,
                 size: 36,
                 color: "#ffffff",
                 weight: 700,
                 shadow: true,
-                align: "center"
-            }
+                align: "right"
+            },
+
+            welcome: {
+                x: 1040,
+                y: 1710,
+                size: 48,
+                color: "#ffffff",
+                weight: 800,
+                maxWidth: 820,
+                align: "right",
+                shadow: true
+            },
+
+            smart: {
+                x: 540,
+                y: 1805,
+                size: 55,
+                color: "#ffd700",
+                weight: 800,
+                maxWidth: 780,
+                align: "center",
+                shadow: true
+            },
         }
     },
-
 
     /*
      * ========================================================
@@ -561,74 +646,6 @@ const TEMPLATE_DEFINITIONS = [
 
     {
         id: "template-06",
-
-        name: "Banjar Tech Gold",
-
-        file: "assets/templates/template-06.png",
-
-        theme: "#74411e",
-
-        initialPhotoScale: 1,
-
-        layout: {
-
-            campaign: {
-                x: 540,
-                y: 140,
-                size: 38,
-                color: "#ffffff",
-                weight: 800,
-                maxWidth: 700,
-                align: "center",
-                shadow: true
-            },
-
-            faculty: {
-                x: 540,
-                y: 200,
-                size: 23,
-                color: "#ffffff",
-                weight: 700,
-                maxWidth: 780,
-                align: "center",
-                shadow: true
-            },
-
-            smart: {
-                x: 540,
-                y: 1600,
-                size: 25,
-                color: "#ffd166",
-                weight: 800,
-                maxWidth: 780,
-                align: "center",
-                shadow: true
-            },
-
-            caption: {
-                x: 540,
-                topY: 380,
-                middleY: 1450,
-                bottomY: 1740,
-                maxWidth: 780,
-                size: 34,
-                color: "#ffffff",
-                weight: 700,
-                shadow: true,
-                align: "center"
-            }
-        }
-    },
-
-
-    /*
-     * ========================================================
-     * TEMPLATE 07
-     * ========================================================
-     */
-
-    {
-        id: "template-07",
 
         name: "Campus Future Green",
 
@@ -653,149 +670,67 @@ const TEMPLATE_DEFINITIONS = [
 
             faculty: {
                 x: 540,
-                y: 190,
-                size: 23,
-                color: "#ffffff",
+                y: 212,
+                size: 39,
+                color: "#160f58",
                 weight: 700,
-                maxWidth: 780,
+                maxWidth: 790,
                 align: "center",
-                shadow: true
+                shadow: false
             },
 
             caption: {
                 x: 540,
                 topY: 360,
-                middleY: 1450,
-                bottomY: 1760,
-                maxWidth: 800,
-                size: 34,
-                color: "#ffffff",
+                middleY: 410,
+                bottomY: 960,
+                maxWidth: 900,
+                size: 32,
+                color: "#053f24",
                 weight: 700,
                 shadow: true,
                 align: "center"
-            }
-        }
-    },
+            },
 
 
-    /*
-     * ========================================================
-     * TEMPLATE 08
-     * ========================================================
-     */
-
-    {
-        id: "template-08",
-
-        name: "Academic Navy",
-
-        file: "assets/templates/template-08.png",
-
-        theme: "#12683f",
-
-        initialPhotoScale: 1,
-
-        layout: {
-
-            campaign: {
-                x: 540,
-                y: 140,
-                size: 38,
+            welcome: {
+                x: 100,
+                y: 1110,
+                size: 48,
                 color: "#ffffff",
                 weight: 800,
-                maxWidth: 700,
-                align: "center",
+                maxWidth: 820,
+                align: "left",
                 shadow: true
             },
 
-            faculty: {
-                x: 540,
-                y: 200,
-                size: 23,
-                color: "#ffffff",
-                weight: 700,
+            smart: {
+                x: 720,
+                y: 1805,
+                size: 55,
+                color: "#ffd700",
+                weight: 800,
                 maxWidth: 780,
                 align: "center",
                 shadow: true
             },
-
-            caption: {
-                x: 540,
-                topY: 400,
-                middleY: 1450,
-                bottomY: 1740,
-                maxWidth: 780,
-                size: 34,
-                color: "#ffffff",
-                weight: 700,
-                shadow: true,
-                align: "center"
-            }
         }
     },
+
+
 
 
     /*
      * ========================================================
-     * TEMPLATE 09
+     * TEMPLATE 07
      * ========================================================
      */
 
-    {
-        id: "template-09",
-
-        name: "FTI Digital Spectrum",
-
-        file: "assets/templates/template-09.png",
-
-        theme: "#12683f",
-
-        initialPhotoScale: 1,
-
-        layout: {
-
-            campaign: {
-                x: 540,
-                y: 130,
-                size: 39,
-                color: "#ffffff",
-                weight: 800,
-                maxWidth: 700,
-                align: "center",
-                shadow: true
-            },
-
-            faculty: {
-                x: 540,
-                y: 195,
-                size: 24,
-                color: "#ffffff",
-                weight: 700,
-                maxWidth: 790,
-                align: "center",
-                shadow: true
-            },
-
-            caption: {
-                x: 540,
-                topY: 380,
-                middleY: 1450,
-                bottomY: 1740,
-                maxWidth: 800,
-                size: 34,
-                color: "#ffffff",
-                weight: 700,
-                shadow: true,
-                align: "center"
-            }
-        }
-    },
-
 
     {
-        id: "template-10",
+        id: "template-07",
 
-        name: "FTI Future",
+        name: "FTI Green Techno",
 
         file: "assets/templates/template-10.png",
 
@@ -807,52 +742,74 @@ const TEMPLATE_DEFINITIONS = [
 
             campaign: {
                 x: 540,
-                y: 120,
+                y: 170,
                 size: 35,
-                color: "#000000",
+                color: "#fff",
                 weight: 800,
                 maxWidth: 700,
                 align: "center",
-                shadow: false
+                shadow: true
             },
 
             faculty: {
                 x: 540,
-                y: 175,
-                size: 22,
-                color: "#000000",
-                weight: 700,
+                y: 245,
+                size: 41,
+                color: "#fff",
+                weight: 900,
                 maxWidth: 780,
                 align: "center",
-                shadow: false
+                shadow: true
             },
 
             caption: {
-                x: 850,
+                x: 1050,
                 topY: 350,
                 middleY: 1450,
                 bottomY: 1700,
                 maxWidth: 400,
-                size: 20,
-                color: "#000000",
+                size: 35,
+                color: "#fff",
                 weight: 700,
                 shadow: false,
                 align: "right"
             },
 
             wordmark: {
-                x: 140,
+                x: 240,
                 y: 1700,
-                width: 170,
-                height: 120
+                width: 350,
+                height: 265
             },
 
             emblem: {
-                x: 930,
-                y: 1700,
-                width: 140,
-                height: 140
-            }
+                x: 130,
+                y: 100,
+                width: 200,
+                height: 200
+            },
+
+            welcome: {
+                x: 180,
+                y: 1110,
+                size: 31,
+                color: "#ffffff",
+                weight: 800,
+                maxWidth: 500,
+                align: "left",
+                shadow: true
+            },
+
+            smart: {
+                x: 720,
+                y: 1805,
+                size: 55,
+                color: "#ffd700",
+                weight: 800,
+                maxWidth: 780,
+                align: "center",
+                shadow: true
+            },
         }
     },
 

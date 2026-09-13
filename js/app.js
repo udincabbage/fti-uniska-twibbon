@@ -65,7 +65,7 @@
     //     ];
 
     // Sementara lagi desain
-    let activeTemplate = FINAL_TEMPLATE_DEFINITIONS[1];
+    let activeTemplate = FINAL_TEMPLATE_DEFINITIONS[6];
 
     /*
      * ========================================================
