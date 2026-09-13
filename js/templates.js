@@ -210,7 +210,7 @@ const TEMPLATE_DEFINITIONS = [
     {
         id: "template-01",
 
-        name: "Smart IT Blue",
+        name: "Sky Blue",
 
         file: "assets/templates/template-01.png",
 
@@ -224,7 +224,7 @@ const TEMPLATE_DEFINITIONS = [
                 x: 540,
                 y: 142,
                 size: 41,
-                color: "#ffffff",
+                color: "#3434a3",
                 weight: 800,
                 maxWidth: 690,
                 align: "center",
@@ -243,20 +243,20 @@ const TEMPLATE_DEFINITIONS = [
             },
 
             welcome: {
-                x: 540,
+                x: 310,
                 y: 1530,
-                size: 29,
+                size: 54,
                 color: "#ffffff",
                 weight: 800,
-                maxWidth: 820,
-                align: "center",
+                maxWidth: 700,
+                align: "left",
                 shadow: true
             },
 
             smart: {
-                x: 540,
-                y: 1600,
-                size: 25,
+                x: 640,
+                y: 1800,
+                size: 45,
                 color: "#ffffff",
                 weight: 700,
                 maxWidth: 780,
@@ -265,17 +265,26 @@ const TEMPLATE_DEFINITIONS = [
             },
 
             caption: {
-                x: 540,
-                topY: 380,
-                middleY: 1450,
-                bottomY: 1740,
+                x: 1060,
+                topY: 120,
+                middleY: 590,
+                bottomY: 770,
                 maxWidth: 780,
-                size: 34,
-                color: "#ffffff",
+                size: 45,
+                color: "#fff",
                 weight: 700,
                 shadow: true,
-                align: "center"
-            }
+                align: "right"
+            },
+
+
+            wordmark: {
+                x: 200,
+                y: 1300,
+                width: 350,
+                height: 270
+            },
+
         }
     },
 
@@ -322,19 +331,19 @@ const TEMPLATE_DEFINITIONS = [
             },
 
             welcome: {
-                x: 540,
-                y: 1540,
-                size: 28,
+                x: 1040,
+                y: 1710,
+                size: 48,
                 color: "#ffffff",
                 weight: 800,
                 maxWidth: 820,
-                align: "center",
+                align: "right",
                 shadow: true
             },
 
             smart: {
                 x: 540,
-                y: 1605,
+                y: 1805,
                 size: 24,
                 color: "#ffd700",
                 weight: 800,
@@ -345,11 +354,11 @@ const TEMPLATE_DEFINITIONS = [
 
             caption: {
                 x: 540,
-                topY: 350,
-                middleY: 1430,
-                bottomY: 1760,
+                topY: 300,
+                middleY: 770,
+                bottomY: 960,
                 maxWidth: 820,
-                size: 34,
+                size: 42,
                 color: "#ffffff",
                 weight: 700,
                 shadow: true,
